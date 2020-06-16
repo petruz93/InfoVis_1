@@ -13,8 +13,14 @@ var svg = d3.select('body')
 
 function drawFishes(data) {
 
+  createFishBody(data);
+  createFishFin(data);
+  createFishEye(data);
+}
+
+function createFishBody(data) {
   // costruzione del corpo
-  svg.selectAll('body')
+  svg.selectAll('fish-body')
     .data(data)
     .enter()
     .append('ellipse')
@@ -25,57 +31,84 @@ function drawFishes(data) {
     .style('stroke', 'black')
     .style('stroke-width', 2)
     .style('fill', 'transparent');
-    // //disegna la bocca
-    // .append('path')
-    //   .attr('d', function (d) {
-    //     let path = '';
-    //     let x1 = d.x + d.body;
-    //     let y1 = d.y;
-    //     let x2 = -d.body * .1;
 
-    //     path += 'M' + x1  + ' ' + y1 + ' ' + 'h' + x2;
-    //     console.log('path',path);
-    //     return path;
-    //   })
-
-    // costruzione della coda
-    svg.selectAll('fins')
+    //disegna la bocca
+    svg.selectAll('fish-body')
       .data(data)
       .enter()
-      .append('polygon')
-      .attr('points', function (d) {
+      .append('path')
+      .attr('d', function (d) {
         let path = '';
-        let x1 = d.x - d.body;
+        let x1 = d.x + d.body;
         let y1 = d.y;
-        let x2 = x1 - d.fin;
-        let y2 = y1 + d.fin * .58;
-        let x3 = x1 - d.fin;
-        let y3 = y1 - d.fin * .58
-        path += x1 + ' ' + y1 + ', ' + x2 + ' ' + y2 + ', ' + x3 + ' ' + y3;
+        let x2 = -d.body * .18;
+        path += 'M' + x1  + ' ' + y1 + ' ' + 'h' + x2;
         return path;
       })
       .style('stroke', 'black')
-      .style('stroke-width', 2)
-      .style('fill', 'transparent');
-
-    // costruzione dell'occhio
-    svg.selectAll('eyes')
-      .data(data)
-      .enter()
-      .append('circle')
-      .attr('cx', function (d) { return d.x + d.body * .40 }) //+20
-      .attr('cy', function (d) { return d.y - d.body * .15 }) //-5
-      .attr('r', function (d) { return d.eye })
-      .style('stroke', 'black')
-      .style('stroke-width', 2)
-      .style('fill', 'black');
+      .style('stroke-width', 2);
 }
 
+function createFishFin(data) {
+  // costruzione della coda
+  svg.selectAll('fins')
+    .data(data)
+    .enter()
+    .append('polygon')
+    .attr('points', function (d) {
+      let path = '';
+      let x1 = d.x - d.body;
+      let y1 = d.y;
+      let x2 = x1 - d.fin;
+      let y2 = y1 + d.fin * .58;
+      let x3 = x1 - d.fin;
+      let y3 = y1 - d.fin * .58
+      path += x1 + ' ' + y1 + ', ' + x2 + ' ' + y2 + ', ' + x3 + ' ' + y3;
+      return path;
+    })
+    .style('stroke', 'black')
+    .style('stroke-width', 2)
+    .style('fill', 'transparent');
+}
+
+function createFishEye(data) {
+  // costruzione dell'occhio
+  svg.selectAll('eyes')
+    .data(data)
+    .enter()
+    .append('circle')
+    .attr('cx', function (d) { return d.x + d.body * .40 }) //+20
+    .attr('cy', function (d) { return d.y - d.body * .15 }) //-5
+    .attr('r', function (d) { return d.eye })
+    .style('stroke', 'black')
+    .style('stroke-width', 2)
+    .style('fill', 'black');
+}
+
+var switchYFin = function () {
+  let tmp;
+  d3.selectAll('polygon')
+    .transition()
+    .duration(1000)
+    .attr('points', function (d) {
+      let path = '';
+      let x1 = d.x - d.body;
+      let y1 = d.y;
+      let x2 = x1 - d.fin;
+      let y2 = y1 + d.fin * .88;
+      let x3 = x1 - d.fin;
+      let y3 = y1 - d.fin * .58
+      path += x1 + ' ' + y1 + ', ' + x2 + ' ' + y2 + ', ' + x3 + ' ' + y3;
+      return path;
+    })
+}
 
 d3.json('data/dataset.json')
   .then(function (data) {
     drawFishes(data);
     // putFish(data[0]);
+    d3.selectAll('polyline')
+      .on('click', switchYFin);
   })
   .catch(function (error) {
     console.log(error);
