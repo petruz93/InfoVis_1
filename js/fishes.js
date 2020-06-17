@@ -1,20 +1,20 @@
 var margin = {top: 80, right: 80, bottom: 80, left: 80};
 // var width = d3.select('body').node().getBoundingClientRect().width;
-var width = 1100;// - margin.left - margin.right;
-// var height = d3.select('body').node().getBoundingClientRect().height;
-var height = 800;// - margin.top - margin.bottom;
+var width = 1100;
+var height = 800;
 var updateTime = 1000;
 
+// definizione dei domini e delle scalature per le variabili del dataset
 var xRange = d3.scaleLinear().domain([0, 100]).range([margin.left, width - margin.right]);
 var yRange = d3.scaleLinear().domain([0, 100]).range([margin.top, height - margin.bottom]);
 var bodyRange = d3.scaleLinear().domain([1, 100]).range([10, 100]);
 var finRange = d3.scaleLinear().domain([1, 100]).range([1, 100]);
 var eyeRange = d3.scaleLinear().domain([1, 100]).range([1, 10]);
 
+// carica i dati del dataset
 d3.json('data/dataset.json')
   .then(function (data) {
     drawFishes(data);
-
     d3.selectAll('.body').on('click', switchYBody);
     d3.selectAll('.fin').on('click', switchYFin);
     d3.selectAll('.eye').on('click', switchYEye);
@@ -37,6 +37,7 @@ function drawFishes(data) {
   }
 }
 
+// ogni pesce è rappresentato da un gruppo e possiede tutte le sue variabili
 function putFish(data, i) {
   let fish = svg.append('g')
     .attr('id', 'fish' + i)
@@ -50,23 +51,22 @@ function putFish(data, i) {
   createEye(fish, data);
 }
 
+// costruzione del corpo di un singolo pesce
 function createBody(fish, data) {
-  // costruzione del corpo
+  // disegna il corpo
   fish.selectAll('fish.body')
     .data(data, d => d.body)
     .enter()
     .append('ellipse')
     .attr('class', 'body')
-    // .attr('cx', function (d) { return xRange(d.x) })
-    // .attr('cy', function (d) { return yRange(d.y) })
     .attr('rx', function (d) { return bodyRange(d.body) })
     .attr('ry', function (d) { return bodyRange(d.body) * .58 })
     .style('stroke', 'black')
     .style('stroke-width', 2)
-    .style('fill', 'transparent')
+    .style('fill', '#bbe6e6')
     .attr('body', function (d) { return d.body });
 
-  //disegna la bocca
+  // disegna la bocca
   fish.selectAll('fish.mouth')
     .data(data, d => d.body)
     .enter()
@@ -74,8 +74,8 @@ function createBody(fish, data) {
     .attr('class', 'mouth')
     .attr('d', function (d) {
       let path = '';
-      let x1 = bodyRange(d.body);//xRange(d.x) + bodyRange(d.body);
-      let y1 = 0;//yRange(d.y);
+      let x1 = bodyRange(d.body);
+      let y1 = 0;
       let x2 = -bodyRange(d.body) * .18;
       path += 'M' + x1  + ' ' + y1 + ' ' + 'h' + x2;
       return path;
@@ -84,8 +84,8 @@ function createBody(fish, data) {
     .style('stroke-width', 2);
 }
 
+  // costruzione della coda di un singolo pesce
 function createFin(fish, data) {
-  // costruzione della coda
   fish.selectAll('fish.fin')
     .data(data)
     .enter()
@@ -93,8 +93,8 @@ function createFin(fish, data) {
     .attr('class', 'fin')
     .attr('points', function (d) {
       let path = '';
-      let x1 = -bodyRange(d.body);//xRange(d.x) - bodyRange(d.body);
-      let y1 = 0;//yRange(d.y);
+      let x1 = -bodyRange(d.body);
+      let y1 = 0;
       let x2 = x1 - finRange(d.fin);
       let y2 = y1 + finRange(d.fin) * .58;
       let x3 = x2;
@@ -104,12 +104,12 @@ function createFin(fish, data) {
     })
     .style('stroke', 'black')
     .style('stroke-width', 2)
-    .style('fill', 'transparent')
+    .style('fill', '#bbe6e6')
     .attr('fin', function (d) { return d.fin });
 }
 
+  // costruzione dell'occhio di un singolo pesce
 function createEye(fish, data) {
-  // costruzione dell'occhio
   fish.selectAll('fish.eye')
     .data(data)
     .enter()
@@ -117,8 +117,6 @@ function createEye(fish, data) {
     .attr('class', 'eye')
     .attr('cx', function (d) { return bodyRange(d.body) * .40 })
     .attr('cy', function (d) { return -bodyRange(d.body) * .15 })
-    // .attr('cx', function (d) { return xRange(d.x) + bodyRange(d.body) * .40 })
-    // .attr('cy', function (d) { return yRange(d.y) - bodyRange(d.body) * .15 })
     .attr('r', function (d) { return eyeRange(d.eye) })
     .style('stroke', 'black')
     .style('stroke-width', 2)
@@ -126,8 +124,9 @@ function createEye(fish, data) {
     .attr('eye', function (d) { return d.eye });
 }
 
-///////////////////////////////////////////////////////////
-// gestione degli eventi
+/**********************************************************
+ * Gestione degli eventi
+ ***********************************************************/
 
 var switchYBody = function () {
   let body = d3.select(this).attr('body');
@@ -179,12 +178,14 @@ var switchYBody = function () {
     .attr('cx', function (d) { return bodyRange(y) * .40 })
     .attr('cy', function (d) { return -bodyRange(y) * .15 });
   
+  // aggiorna la posizione del pesce selezionato
   g.attr('y', body)
     .transition().duration(updateTime)
     .attr('transform', 'translate(' + xRange(x) + ',' + yRange(body) + ')');
 }
 
 var switchXBody = function () {
+  // disabilita il comportamento di default del click destro del mouse
   d3.event.preventDefault();
 
   let body = d3.select(this).attr('body');
@@ -236,6 +237,7 @@ var switchXBody = function () {
     .attr('cx', function (d) { return bodyRange(x) * .40 })
     .attr('cy', function (d) { return -bodyRange(x) * .15 });
   
+  // aggiorna la posizione del pesce selezionato
   g.attr('x', body)
     .transition().duration(updateTime)
     .attr('transform', 'translate(' + xRange(body) + ',' + yRange(y) + ')');
@@ -263,12 +265,14 @@ var switchYFin = function () {
       return path;
     });
 
+  // aggiorna la posizione del pesce selezionato
   g.attr('y', fin)
     .transition().duration(updateTime)
     .attr('transform', 'translate(' + xRange(x) + ',' + yRange(fin) + ')');
 }
 
 var switchXFin = function () {
+  // disabilita il comportamento di default del click destro del mouse
   d3.event.preventDefault();
 
   let fin = d3.select(this).attr('fin');
@@ -292,6 +296,7 @@ var switchXFin = function () {
       return path;
     });
 
+  // aggiorna la posizione del pesce selezionato
   g.attr('x', fin)
     .transition().duration(updateTime)
     .attr('transform', 'translate(' + xRange(fin) + ',' + yRange(y) + ')');
@@ -309,12 +314,14 @@ var switchYEye = function () {
     .duration(updateTime)
     .attr('r', eyeRange(y));
   
+  // aggiorna la posizione del pesce selezionato
   g.attr('y', eye)
     .transition().duration(updateTime)
     .attr('transform', 'translate(' + xRange(x) + ',' + yRange(eye) + ')');
 }
 
 var switchXEye = function () {
+  // disabilita il comportamento di default del click destro del mouse
   d3.event.preventDefault();
 
   let eye = d3.select(this).attr('eye');
@@ -328,6 +335,7 @@ var switchXEye = function () {
     .duration(updateTime)
     .attr('r', eyeRange(x));
   
+  // aggiorna la posizione del pesce selezionato
   g.attr('x', eye)
     .transition().duration(updateTime)
     .attr('transform', 'translate(' + xRange(eye) + ',' + yRange(y) + ')');
