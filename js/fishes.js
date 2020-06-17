@@ -7,28 +7,34 @@ var updateTime = 1000;
 
 var xRange = d3.scaleLinear().domain([0, 100]).range([margin.left, width - margin.right]);
 var yRange = d3.scaleLinear().domain([0, 100]).range([margin.top, height - margin.bottom]);
-var bodyRange = d3.scaleLinear().domain([0, 100]).range([10, 100]);
-var finRange = d3.scaleLinear().domain([0, 100]).range([1, 100]);
-var eyeRange = d3.scaleLinear().domain([0, 100]).range([1, 10]);
+var bodyRange = d3.scaleLinear().domain([1, 100]).range([10, 100]);
+var finRange = d3.scaleLinear().domain([1, 100]).range([1, 100]);
+var eyeRange = d3.scaleLinear().domain([1, 100]).range([1, 10]);
+
+d3.json('data/dataset.json')
+  .then(function (data) {
+    drawFishes(data);
+
+    d3.selectAll('.body').on('click', switchYBody);
+    d3.selectAll('.fin').on('click', switchYFin);
+    d3.selectAll('.eye').on('click', switchYEye);
+
+    // d3.selectAll('.fin').on('contextmenu', switchXFin);
+  })
+  .catch(function (error) {
+    console.log(error);
+  });
 
 var svg = d3.select('body')
             .append('svg')
             .attr("width", width)
             .attr("height", height);
 
-
 function drawFishes(data) {
   for (let i = 0; i < data.length; i++) {
     putFish([data[i]], i);
   }
-
-  d3.selectAll('.body').on('click', switchYBody);
-  d3.selectAll('.fin').on('click', switchYFin);
-  d3.selectAll('.eye').on('click', switchYEye);
-
-  // d3.selectAll('.fin').on('contextmenu', switchXFin);
 }
-
 
 function putFish(data, i) {
   let fish = svg.append('g')
@@ -46,7 +52,7 @@ function putFish(data, i) {
 function createBody(fish, data) {
   // costruzione del corpo
   fish.selectAll('fish.body')
-    .data(data)
+    .data(data, d => d.body)
     .enter()
     .append('ellipse')
     .attr('class', 'body')
@@ -61,7 +67,7 @@ function createBody(fish, data) {
 
   //disegna la bocca
   fish.selectAll('fish.mouth')
-    .data(data)
+    .data(data, d => d.body)
     .enter()
     .append('path')
     .attr('class', 'mouth')
@@ -157,7 +163,7 @@ var switchYBody = function () {
       let y1 = 0;
       let x2 = x1 - finRange(d.fin);
       let y2 = y1 + finRange(d.fin) * .58;
-      let x3 = x1 - finRange(d.fin);
+      let x3 = x2;
       let y3 = y1 - finRange(d.fin) * .58;
       path += x1 + ' ' + y1 + ', ' + x2 + ' ' + y2 + ', ' + x3 + ' ' + y3;
       return path;
@@ -188,11 +194,11 @@ var switchYFin = function () {
     .duration(updateTime)
     .attr('points', function (d) {
       let path = '';
-      let x1 = 0;//-bodyRange(d.body);
+      let x1 = -bodyRange(d.body);
       let y1 = 0;
       let x2 = x1 - finRange(y);
       let y2 = y1 + finRange(y) * .58;
-      let x3 = x1 - finRange(y);
+      let x3 = x2;
       let y3 = y1 - finRange(y) * .58;
       path += x1 + ' ' + y1 + ', ' + x2 + ' ' + y2 + ', ' + x3 + ' ' + y3;
       return path;
@@ -219,12 +225,3 @@ var switchYEye = function () {
     .transition().duration(updateTime)
     .attr('transform', 'translate(' + xRange(x) + ',' + yRange(eye) + ')');
 }
-
-
-d3.json('data/dataset.json')
-  .then(function (data) {
-    drawFishes(data);
-  })
-  .catch(function (error) {
-    console.log(error);
-  });
