@@ -16,6 +16,7 @@ Fai in modo che i cambi di dimensioni e di posizione dei pesci avvengano con un'
 
 ## Avvio dell'applicativo
 Lanciare il comdando seguente all'interno della directory principale:
+
     `python3 -m http.server`
 
 ## Descrizione
