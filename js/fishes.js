@@ -18,8 +18,9 @@ d3.json('data/dataset.json')
     d3.selectAll('.body').on('click', switchYBody);
     d3.selectAll('.fin').on('click', switchYFin);
     d3.selectAll('.eye').on('click', switchYEye);
-
-    // d3.selectAll('.fin').on('contextmenu', switchXFin);
+    d3.selectAll('.body').on('contextmenu', switchXBody);
+    d3.selectAll('.fin').on('contextmenu', switchXFin);
+    d3.selectAll('.eye').on('contextmenu', switchXEye);
   })
   .catch(function (error) {
     console.log(error);
@@ -125,6 +126,8 @@ function createEye(fish, data) {
     .attr('eye', function (d) { return d.eye });
 }
 
+///////////////////////////////////////////////////////////
+// gestione degli eventi
 
 var switchYBody = function () {
   let body = d3.select(this).attr('body');
@@ -171,7 +174,6 @@ var switchYBody = function () {
 
   //update della posizione dell'occhio
   d3.selectAll('.eye')
-    .attr('eye', y)
     .transition()
     .duration(updateTime)
     .attr('cx', function (d) { return bodyRange(y) * .40 })
@@ -180,6 +182,63 @@ var switchYBody = function () {
   g.attr('y', body)
     .transition().duration(updateTime)
     .attr('transform', 'translate(' + xRange(x) + ',' + yRange(body) + ')');
+}
+
+var switchXBody = function () {
+  d3.event.preventDefault();
+
+  let body = d3.select(this).attr('body');
+  let g = d3.select(this.parentNode);
+  let x = g.attr('x');
+  let y = g.attr('y');
+
+  //update del corpo
+  d3.selectAll('.body')
+    .attr('body', x)
+    .transition()
+    .duration(updateTime)
+    .attr('rx', function (d) { return bodyRange(x) })
+    .attr('ry', function (d) { return bodyRange(x) * .58 });
+  
+  //update della bocca
+  d3.selectAll('.mouth')
+    .transition()
+    .duration(updateTime)
+    .attr('d', function (d) {
+      let path = '';
+      let x1 = bodyRange(x);
+      let y1 = 0;
+      let x2 = -bodyRange(x) * .18;
+      path += 'M' + x1  + ' ' + y1 + ' ' + 'h' + x2;
+      return path;
+    });
+
+  //update della posizione della pinna
+  d3.selectAll('.fin')
+    .transition()
+    .duration(updateTime)
+    .attr('points', function (d) {
+      let path = '';
+      let x1 = -bodyRange(x);
+      let y1 = 0;
+      let x2 = x1 - finRange(d.fin);
+      let y2 = y1 + finRange(d.fin) * .58;
+      let x3 = x2;
+      let y3 = y1 - finRange(d.fin) * .58;
+      path += x1 + ' ' + y1 + ', ' + x2 + ' ' + y2 + ', ' + x3 + ' ' + y3;
+      return path;
+    });
+
+  //update della posizione dell'occhio
+  d3.selectAll('.eye')
+    .transition()
+    .duration(updateTime)
+    .attr('cx', function (d) { return bodyRange(x) * .40 })
+    .attr('cy', function (d) { return -bodyRange(x) * .15 });
+  
+  g.attr('x', body)
+    .transition().duration(updateTime)
+    .attr('transform', 'translate(' + xRange(body) + ',' + yRange(y) + ')');
 }
 
 var switchYFin = function () {
@@ -209,6 +268,35 @@ var switchYFin = function () {
     .attr('transform', 'translate(' + xRange(x) + ',' + yRange(fin) + ')');
 }
 
+var switchXFin = function () {
+  d3.event.preventDefault();
+
+  let fin = d3.select(this).attr('fin');
+  let g = d3.select(this.parentNode);
+  let x = g.attr('x');
+  let y = g.attr('y');
+
+  d3.selectAll('.fin')
+    .attr('fin', x)
+    .transition()
+    .duration(updateTime)
+    .attr('points', function (d) {
+      let path = '';
+      let x1 = -bodyRange(d.body);
+      let y1 = 0;
+      let x2 = x1 - finRange(x);
+      let y2 = y1 + finRange(x) * .58;
+      let x3 = x2;
+      let y3 = y1 - finRange(x) * .58;
+      path += x1 + ' ' + y1 + ', ' + x2 + ' ' + y2 + ', ' + x3 + ' ' + y3;
+      return path;
+    });
+
+  g.attr('x', fin)
+    .transition().duration(updateTime)
+    .attr('transform', 'translate(' + xRange(fin) + ',' + yRange(y) + ')');
+}
+
 var switchYEye = function () {
   let eye = d3.select(this).attr('eye');
   let g = d3.select(this.parentNode);
@@ -224,4 +312,23 @@ var switchYEye = function () {
   g.attr('y', eye)
     .transition().duration(updateTime)
     .attr('transform', 'translate(' + xRange(x) + ',' + yRange(eye) + ')');
+}
+
+var switchXEye = function () {
+  d3.event.preventDefault();
+
+  let eye = d3.select(this).attr('eye');
+  let g = d3.select(this.parentNode);
+  let x = g.attr('x');
+  let y = g.attr('y');
+
+  d3.selectAll('.eye')
+    .attr('eye', x)
+    .transition()
+    .duration(updateTime)
+    .attr('r', eyeRange(x));
+  
+  g.attr('x', eye)
+    .transition().duration(updateTime)
+    .attr('transform', 'translate(' + xRange(eye) + ',' + yRange(y) + ')');
 }
