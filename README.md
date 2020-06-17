@@ -22,3 +22,4 @@ Lanciare il comdando seguente all'interno della directory principale:
 I pesci sono stati disegnati usando tre forme geometriche: un'ellisse per il corpo, un triagolo per la coda (unica pinna) e un cerchio per l'occhio.
 Nella costruzione di un pesce le variabili sono lette dal dataset e i diversi elementi sono disposti prendendo come punto di riferimento il centro dell'ellisse (il corpo) e come tale è mantenuto come origine e come riferimento per l'intero pesce.
 L'immagine del pesce è stata progettata e disegnata calcolando accuratamente le proporzioni tra gli elementi che lo compongono, andando ad individuare delle costanti moltiplicative per ogni componente.
+Le variabili del dataset sono tutte comprese nell'intervallo (0,100], e sono scalate opportunamente dalle rispettive funzioni di scaling per renderle proporzionali l'una con le altre.
