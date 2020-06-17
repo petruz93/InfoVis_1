@@ -22,6 +22,7 @@ function drawFishes(data) {
     putFish([data[i]], i);
   }
 
+  d3.selectAll('.body').on('click', switchYBody);
   d3.selectAll('.fin').on('click', switchYFin);
   d3.selectAll('.eye').on('click', switchYEye);
 
@@ -30,14 +31,12 @@ function drawFishes(data) {
 
 
 function putFish(data, i) {
-  // const x = xRange(data[0].x);
-  // const y = yRange(data[0].y);
-
   let fish = svg.append('g')
     .attr('id', 'fish' + i)
     .attr('class', 'fish')
     .attr('x', data[0].x)
-    .attr('y', data[0].y);
+    .attr('y', data[0].y)
+    .attr('transform', 'translate(' + xRange(data[0].x) + ',' + yRange(data[0].y) + ')');
   
   createBody(fish, data);
   createFin(fish, data);
@@ -51,8 +50,8 @@ function createBody(fish, data) {
     .enter()
     .append('ellipse')
     .attr('class', 'body')
-    .attr('cx', function (d) { return xRange(d.x) })
-    .attr('cy', function (d) { return yRange(d.y) })
+    // .attr('cx', function (d) { return xRange(d.x) })
+    // .attr('cy', function (d) { return yRange(d.y) })
     .attr('rx', function (d) { return bodyRange(d.body) })
     .attr('ry', function (d) { return bodyRange(d.body) * .58 })
     .style('stroke', 'black')
@@ -68,8 +67,8 @@ function createBody(fish, data) {
     .attr('class', 'mouth')
     .attr('d', function (d) {
       let path = '';
-      let x1 = xRange(d.x) + bodyRange(d.body);
-      let y1 = yRange(d.y);
+      let x1 = bodyRange(d.body);//xRange(d.x) + bodyRange(d.body);
+      let y1 = 0;//yRange(d.y);
       let x2 = -bodyRange(d.body) * .18;
       path += 'M' + x1  + ' ' + y1 + ' ' + 'h' + x2;
       return path;
@@ -87,8 +86,8 @@ function createFin(fish, data) {
     .attr('class', 'fin')
     .attr('points', function (d) {
       let path = '';
-      let x1 = xRange(d.x) - bodyRange(d.body);
-      let y1 = yRange(d.y);
+      let x1 = -bodyRange(d.body);//xRange(d.x) - bodyRange(d.body);
+      let y1 = 0;//yRange(d.y);
       let x2 = x1 - finRange(d.fin);
       let y2 = y1 + finRange(d.fin) * .58;
       let x3 = x2;
@@ -109,8 +108,10 @@ function createEye(fish, data) {
     .enter()
     .append('circle')
     .attr('class', 'eye')
-    .attr('cx', function (d) { return xRange(d.x) + bodyRange(d.body) * .40 })
-    .attr('cy', function (d) { return yRange(d.y) - bodyRange(d.body) * .15 })
+    .attr('cx', function (d) { return bodyRange(d.body) * .40 })
+    .attr('cy', function (d) { return -bodyRange(d.body) * .15 })
+    // .attr('cx', function (d) { return xRange(d.x) + bodyRange(d.body) * .40 })
+    // .attr('cy', function (d) { return yRange(d.y) - bodyRange(d.body) * .15 })
     .attr('r', function (d) { return eyeRange(d.eye) })
     .style('stroke', 'black')
     .style('stroke-width', 2)
@@ -119,28 +120,94 @@ function createEye(fish, data) {
 }
 
 
-var switchYFin = function () {
-  let tmp;
-  d3.selectAll('polygon')
+var switchYBody = function () {
+  let body = d3.select(this).attr('body');
+  let g = d3.select(this.parentNode);
+  let x = g.attr('x');
+  let y = g.attr('y');
+
+  //update del corpo
+  d3.selectAll('.body')
+    .attr('body', y)
+    .transition()
+    .duration(updateTime)
+    .attr('rx', function (d) { return bodyRange(y) })
+    .attr('ry', function (d) { return bodyRange(y) * .58 });
+  
+  //update della bocca
+  d3.selectAll('.mouth')
+    .transition()
+    .duration(updateTime)
+    .attr('d', function (d) {
+      let path = '';
+      let x1 = bodyRange(y);
+      let y1 = 0;
+      let x2 = -bodyRange(y) * .18;
+      path += 'M' + x1  + ' ' + y1 + ' ' + 'h' + x2;
+      return path;
+    });
+
+  //update della posizione della pinna
+  d3.selectAll('.fin')
     .transition()
     .duration(updateTime)
     .attr('points', function (d) {
       let path = '';
-      let x1 = d.x - d.body;
-      let y1 = d.y;
-      let x2 = x1 - d.fin;
-      let y2 = y1 + d.fin * .98;
-      let x3 = x1 - d.fin;
-      let y3 = y1 - d.fin * .58;
+      let x1 = -bodyRange(y);
+      let y1 = 0;
+      let x2 = x1 - finRange(d.fin);
+      let y2 = y1 + finRange(d.fin) * .58;
+      let x3 = x1 - finRange(d.fin);
+      let y3 = y1 - finRange(d.fin) * .58;
       path += x1 + ' ' + y1 + ', ' + x2 + ' ' + y2 + ', ' + x3 + ' ' + y3;
       return path;
     });
+
+  //update della posizione dell'occhio
+  d3.selectAll('.eye')
+    .attr('eye', y)
+    .transition()
+    .duration(updateTime)
+    .attr('cx', function (d) { return bodyRange(y) * .40 })
+    .attr('cy', function (d) { return -bodyRange(y) * .15 });
+  
+  g.attr('y', body)
+    .transition().duration(updateTime)
+    .attr('transform', 'translate(' + xRange(x) + ',' + yRange(body) + ')');
+}
+
+var switchYFin = function () {
+  let fin = d3.select(this).attr('fin');
+  let g = d3.select(this.parentNode);
+  let x = g.attr('x');
+  let y = g.attr('y');
+
+  d3.selectAll('.fin')
+    .attr('fin', y)
+    .transition()
+    .duration(updateTime)
+    .attr('points', function (d) {
+      let path = '';
+      let x1 = 0;//-bodyRange(d.body);
+      let y1 = 0;
+      let x2 = x1 - finRange(y);
+      let y2 = y1 + finRange(y) * .58;
+      let x3 = x1 - finRange(y);
+      let y3 = y1 - finRange(y) * .58;
+      path += x1 + ' ' + y1 + ', ' + x2 + ' ' + y2 + ', ' + x3 + ' ' + y3;
+      return path;
+    });
+
+  g.attr('y', fin)
+    .transition().duration(updateTime)
+    .attr('transform', 'translate(' + xRange(x) + ',' + yRange(fin) + ')');
 }
 
 var switchYEye = function () {
-  var eye = d3.select(this).attr('eye');
-  var g = d3.select(this.parentNode);
-  var y = g.attr('y');
+  let eye = d3.select(this).attr('eye');
+  let g = d3.select(this.parentNode);
+  let x = g.attr('x');
+  let y = g.attr('y');
 
   d3.selectAll('.eye')
     .attr('eye', y)
@@ -150,8 +217,7 @@ var switchYEye = function () {
   
   g.attr('y', eye)
     .transition().duration(updateTime)
-    .attr('transform', 'translate(0,' + yRange(eye) + ')')
-    // .attr('transform', 'translate(0,0)');
+    .attr('transform', 'translate(' + xRange(x) + ',' + yRange(eye) + ')');
 }
 
 
