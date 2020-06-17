@@ -258,7 +258,7 @@ var switchYFin = function () {
     .duration(updateTime)
     .attr('points', function (d) {
       let path = '';
-      let x1 = -bodyRange(d.body);
+      let x1 = -bodyRange(g.select('.body').attr('body'));
       let y1 = 0;
       let x2 = x1 - finRange(y);
       let y2 = y1 + finRange(y) * .58;
@@ -290,7 +290,7 @@ var switchXFin = function () {
     .duration(updateTime)
     .attr('points', function (d) {
       let path = '';
-      let x1 = -bodyRange(d.body);
+      let x1 = -bodyRange(g.select('.body').attr('body'));
       let y1 = 0;
       let x2 = x1 - finRange(x);
       let y2 = y1 + finRange(x) * .58;
