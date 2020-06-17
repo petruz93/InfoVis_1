@@ -15,7 +15,7 @@ Facendo click con il pulsante destro lo stesso scambio avviene rispetto alla coo
 Fai in modo che i cambi di dimensioni e di posizione dei pesci avvengano con un'animazione fluida.
 
 ## Avvio dell'applicativo
-Lanciare il comdando seguente all'interno della directory principale:
+Lanciare il comando seguente all'interno della directory principale:
 
     `python3 -m http.server`
 
